@@ -25,14 +25,21 @@ $ git clone https://github.com/UltimaLabs/rotatorshell.git
 
 ### Building and running the Spring Boot application
 
-To build the executable jar you can execute the following command (adjust version as needed):
-
+To run the application, execute the following Gradle command:
 ```
-./gradlew clean build && java -jar build/libs/rotatorshell-0.0.0-0.jar
+./gradlew bootRun
 ```
 
-Gradle uses `jgitver`, a plugin which provides a standardized way, via a library, to calculate a project [semver](http://semver.org) compatible version from a git repository and its content. 
+To build the executable jar, run the following command::
+```
+./gradlew bootJar
+```
+Gradle uses `jgitver`, a plugin which provides a standardized way, via a library, to calculate a project [semver](http://semver.org) compatible version from a git repository and its content.
 
+The executable jar is located in the `build/libs` directory. You can run it by executing the following command (adjust version as needed):
+```
+java -jar build/libs/rotatorshell-0.0.0-0.jar
+```
 
 ## Configuration
 

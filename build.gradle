@@ -22,6 +22,12 @@ repositories {
 	mavenCentral()
 }
 
+bootRun {
+	// otherwise bootRun crashes with
+	// "java.lang.IllegalStateException: Failed to execute ApplicationRunner" error
+	standardInput = System.in
+}
+
 dependencies {
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	implementation 'org.springframework.boot:spring-boot-starter'
