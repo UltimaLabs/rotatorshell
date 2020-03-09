@@ -1,0 +1,45 @@
+plugins {
+	id 'org.springframework.boot' version '2.2.5.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	//id 'fr.brouillard.oss.gradle.jgitver' version '0.9.1'
+	id 'java'
+}
+
+group = 'com.ultimalabs'
+sourceCompatibility = '1.8'
+
+configurations {
+	developmentOnly
+	runtimeClasspath {
+		extendsFrom developmentOnly
+	}
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+task cleanDeployDir(type: Delete) {
+	delete fileTree('provisioning/roles/deploy-app/files') {
+		include '**/*.jar'
+	}
+}
+
+task buildDeployJar(type: Copy) {
+	from jar
+	into "provisioning/roles/deploy-app/files"
+}
+
+
+dependencies {
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.shell:spring-shell-starter:2.0.1.RELEASE'
+	implementation 'org.hibernate.validator:hibernate-validator'
+	annotationProcessor 'org.projectlombok:lombok'
+}
+
+buildDeployJar.dependsOn cleanDeployDir, build

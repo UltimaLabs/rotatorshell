@@ -1,0 +1,18 @@
+logging:
+  level:
+    root: ERROR
+
+shell:
+  out:
+    info: CYAN
+    success: GREEN
+    warning: YELLOW
+    error: RED
+
+rotatorshell:
+  rotctldHost: 10.8.19.1 # rotctld host
+  rotctldPort: 4533 # rotctld port
+  setPosWaitStep: 200 # milliseconds
+  setPosWaitNumSteps: 5
+  setPosWaitTimeout: 120 # seconds
+
