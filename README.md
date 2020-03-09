@@ -11,8 +11,6 @@ RotatorShell lets you manually adjust antenna rotator position through `rotctld`
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
 ### Prerequisites
 
 * [JDK 1.8 or higher](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
@@ -35,7 +33,6 @@ To build the executable jar you can execute the following command (adjust versio
 
 Gradle uses `jgitver`, a plugin which provides a standardized way, via a library, to calculate a project [semver](http://semver.org) compatible version from a git repository and its content. 
 
-By default, the application log is output to `stdout`.
 
 ## Configuration
 
