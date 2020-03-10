@@ -5,6 +5,7 @@ build/
 !**/src/main/**
 !**/src/test/**
 spring-shell.log
+/*.csv
 
 ### STS ###
 .apt_generated

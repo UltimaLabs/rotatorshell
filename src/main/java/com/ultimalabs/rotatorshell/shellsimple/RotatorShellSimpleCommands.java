@@ -1,4 +1,4 @@
-package com.ultimalabs.rotatorshell.simplecommands;
+package com.ultimalabs.rotatorshell.shellsimple;
 
 import com.ultimalabs.rotatorshell.common.config.ShellHelper;
 import com.ultimalabs.rotatorshell.common.model.AzimuthElevation;
@@ -10,7 +10,7 @@ import org.springframework.shell.standard.ShellOption;
 
 @ShellComponent
 @RequiredArgsConstructor
-public class SimpleCommands {
+public class RotatorShellSimpleCommands {
 
     private final RotctldClientService rotctldClientService;
     private final ShellHelper shellHelper;
