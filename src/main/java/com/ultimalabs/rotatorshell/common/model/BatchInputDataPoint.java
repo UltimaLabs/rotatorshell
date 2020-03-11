@@ -1,6 +1,5 @@
-package com.ultimalabs.rotatorshell.shellbatch.model;
+package com.ultimalabs.rotatorshell.common.model;
 
-import com.ultimalabs.rotatorshell.common.model.AzimuthElevation;
 import lombok.Data;
 
 /**

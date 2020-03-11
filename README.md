@@ -47,5 +47,5 @@ Local development application is configured by editing the `src/main/resources/a
 
 ## Help
 
-Type `help` after starting the RotatorShell application to get the list of available commands. Enter `help <command>` (for example `help set`) to display help about individual command.
+Type `help` after starting the RotatorShell application to get the list of available commands. Enter `help <command>` to display help about individual command.
  

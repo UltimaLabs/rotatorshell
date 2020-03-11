@@ -17,7 +17,7 @@ public class RotatorShellSimpleCommands {
 
     @ShellMethod(value = "Get rotator azimuth/elevation.", key = {"get", "g"})
     public String getAzEl() {
-        AzimuthElevation azimuthElevation = rotctldClientService.getAzEl();
+        AzimuthElevation azimuthElevation = rotctldClientService.getAzEl(true);
 
         if (azimuthElevation != null) {
             return shellHelper.getInfoMessage(azimuthElevation.toString());
@@ -34,7 +34,7 @@ public class RotatorShellSimpleCommands {
 
     ) {
         AzimuthElevation azimuthElevation = new AzimuthElevation(azimuth, elevation);
-        AzimuthElevation newAzimuthElevation = rotctldClientService.setAzEl(azimuthElevation);
+        AzimuthElevation newAzimuthElevation = rotctldClientService.setAzEl(azimuthElevation, true);
 
         if (newAzimuthElevation == null) {
             return shellHelper.getErrorMessage("There was an error setting azimuth/elevation.");

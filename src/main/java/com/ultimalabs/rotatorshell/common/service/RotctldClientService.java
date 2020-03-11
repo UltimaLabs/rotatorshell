@@ -2,6 +2,8 @@ package com.ultimalabs.rotatorshell.common.service;
 
 import com.ultimalabs.rotatorshell.common.config.RotatorShellConfig;
 import com.ultimalabs.rotatorshell.common.model.AzimuthElevation;
+import com.ultimalabs.rotatorshell.common.model.BatchInputDataPoint;
+import com.ultimalabs.rotatorshell.common.model.BatchOutputDataPoint;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,6 +14,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Client service for rotctld
@@ -31,10 +35,14 @@ public class RotctldClientService {
      * Set rotator azimuth & elevation
      *
      * @param azEl newly set azimuth/elevation
+     * @param handleConnection should the method open/close the TCP connection
+     * @return new az/el, as reported by the rotator
      */
-    public AzimuthElevation setAzEl(AzimuthElevation azEl) {
+    public AzimuthElevation setAzEl(AzimuthElevation azEl, boolean handleConnection) {
 
-        startConnection();
+        if (handleConnection) {
+            startConnection();
+        }
 
         String returnMessage = sendMessage(",\\set_pos " + azEl.getAzimuth() + " " + azEl.getElevation());
 
@@ -44,8 +52,11 @@ public class RotctldClientService {
             return null;
         }
 
-        AzimuthElevation currentAzEl = waitForRotator();
-        stopConnection();
+        AzimuthElevation currentAzEl = waitForRotator(handleConnection);
+
+        if (handleConnection) {
+            stopConnection();
+        }
 
         return currentAzEl;
 
@@ -54,13 +65,18 @@ public class RotctldClientService {
     /**
      * Get rotator azimuth & elevation
      *
+     * @param handleConnection should the method open/close the TCP connection
      * @return azimuth & elevation
      */
-    public AzimuthElevation getAzEl() {
+    public AzimuthElevation getAzEl(boolean handleConnection) {
 
-        startConnection();
+        if (handleConnection) {
+            startConnection();
+        }
         String returnMessage = sendMessage(",\\get_pos");
-        stopConnection();
+        if (handleConnection) {
+            stopConnection();
+        }
 
         if (isInvalidResponse(returnMessage)) {
             log.error("Rotctld failed executing getAzEl() command. Response: {}", returnMessage);
@@ -75,11 +91,57 @@ public class RotctldClientService {
     }
 
     /**
+     * Batch set rotator azimuth/elevation
+     *
+     * @param inputDataPoints list of input data points - az/el, duration at that az/el
+     * @return list of output data points - az/el, begin timestamp, end timestamp
+     */
+    public List<BatchOutputDataPoint> batchSetAzEl(List<BatchInputDataPoint> inputDataPoints) {
+
+        List<BatchOutputDataPoint> outputDataPoints = new ArrayList<>();
+
+        startConnection();
+
+        for (BatchInputDataPoint dataPoint : inputDataPoints) {
+
+            AzimuthElevation azEl = dataPoint.getAzimuthElevation();
+            int duration = dataPoint.getDuration();
+
+            if (duration < 1) {
+                duration = 1;
+            }
+
+            AzimuthElevation currentPosition = setAzEl(azEl, false);
+            if (currentPosition == null) {
+                continue;
+            }
+
+            try {
+
+                long beginTimestamp = Instant.now().toEpochMilli();
+                Thread.sleep((long) duration * 1000);
+                long endTimestamp = Instant.now().toEpochMilli();
+                outputDataPoints.add(new BatchOutputDataPoint(currentPosition, beginTimestamp, endTimestamp));
+
+            } catch (InterruptedException e) {
+                log.error("Interrupted exception: {}", e.getMessage());
+            }
+
+        }
+
+        stopConnection();
+
+        return outputDataPoints;
+
+    }
+
+    /**
      * Wait for rotator to complete the setAzEl() command
      *
+     * @param handleConnection should the method open/close the TCP connection
      * @return newly set azimuth/elevation
      */
-    private AzimuthElevation waitForRotator() {
+    private AzimuthElevation waitForRotator(boolean handleConnection) {
 
         int setPosWaitStep = config.getSetPosWaitStep();
         int setPosWaitNumSteps = config.getSetPosWaitNumSteps();
@@ -95,7 +157,7 @@ public class RotctldClientService {
 
                 Thread.sleep(setPosWaitStep);
 
-                currentPosition = getAzEl();
+                currentPosition = getAzEl(handleConnection);
 
                 if (prevPosition != null && prevPosition.equals(currentPosition)) {
                     numStopSteps++;
@@ -129,7 +191,7 @@ public class RotctldClientService {
         if (message == null) {
             return true;
         }
-        return !message.contains("RPRT 0");
+        return !(message.contains(",") && message.contains("RPRT 0"));
     }
 
     /**

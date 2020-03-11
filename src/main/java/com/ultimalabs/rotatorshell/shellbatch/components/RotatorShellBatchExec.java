@@ -1,8 +1,9 @@
 package com.ultimalabs.rotatorshell.shellbatch.components;
 
 import com.ultimalabs.rotatorshell.common.config.ShellHelper;
+import com.ultimalabs.rotatorshell.common.model.BatchOutputDataPoint;
 import com.ultimalabs.rotatorshell.common.service.RotctldClientService;
-import com.ultimalabs.rotatorshell.shellbatch.model.BatchInputDataPoint;
+import com.ultimalabs.rotatorshell.common.model.BatchInputDataPoint;
 import com.ultimalabs.rotatorshell.shellbatch.util.CsvUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.shell.standard.ShellComponent;
@@ -24,17 +25,29 @@ public class RotatorShellBatchExec {
             @ShellOption(value = {"-out"}, help = "Output CSV file name") String outputCsvFile
     ) {
 
-        List<BatchInputDataPoint> records = CsvUtil.readAzElData(inputCsvFile);
+        List<BatchInputDataPoint> inputDataPoints = CsvUtil.readAzElData(inputCsvFile);
 
-        if (records.isEmpty()) {
+        if (inputDataPoints.isEmpty()) {
             return shellHelper.getErrorMessage("Error reading input file.");
         }
 
-        shellHelper.printInfo("Input data points: " + records.size());
+        shellHelper.printInfo("Input data points: " + inputDataPoints.size() +"\nWorking, please wait...");
+        List<BatchOutputDataPoint> outputDataPoints = rotctldClientService.batchSetAzEl(inputDataPoints);
+
+        if (outputDataPoints.isEmpty()) {
+            return shellHelper.getErrorMessage("No output data was returned.");
+        }
+
+        boolean success = CsvUtil.writeOutputAzElData(outputDataPoints, outputCsvFile);
+
+        if (success) {
+            shellHelper.printInfo("Written output file: " + outputCsvFile);
+        } else {
+            return shellHelper.getErrorMessage("Error writing output file.");
+        }
 
         return shellHelper.getSuccessMessage("Done.");
 
     }
-
 
 }
