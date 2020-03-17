@@ -1,0 +1,13 @@
+#!/usr/bin/env ansible-playbook
+---
+- name: RotatorShell - copy app JAR to server
+  hosts: fersat1
+  become: True
+  become_user: root
+  become_method: sudo
+
+  vars_files:
+    - vars/fersat.yml
+
+  roles:
+    - { role: deploy-app }

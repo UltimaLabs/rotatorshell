@@ -1,0 +1,38 @@
+---
+# tasks file for deploy-app
+
+- name: Create the app folder
+  file: path={{ app_basedir }} owner={{ app_files_owner }} group={{ app_files_group }} mode=0775 state=directory
+
+- name: Copy the app JAR
+  copy:
+    src: "{{ app_jar_file }}"
+    dest: "{{ app_basedir }}/{{ app_jar_file }}"
+    owner: "{{ app_files_owner }}"
+    group: "{{ app_files_group }}"
+
+- name: Delete old JARs
+  script: delete_old_jars.sh {{ app_basedir }} {{ num_old_jars_to_keep }}
+
+- name: Copy application.yml file
+  template:
+    src: "{{ app_properties_src }}"
+    dest: "{{ app_basedir }}/application.yml"
+    owner: "{{ app_files_owner }}"
+    group: "{{ app_files_group }}"
+
+- name: Copy banner.txt file
+  copy:
+    src: "{{ app_banner_src }}"
+    dest: "{{ app_basedir }}/banner.txt"
+    owner: "{{ app_files_owner }}"
+    group: "{{ app_files_group }}"
+
+- name: Copy the executable script
+  template:
+    src: rs.j2
+    dest: "{{ app_executable_path }}"
+    owner: root
+    group: root
+    mode: '0775'
+

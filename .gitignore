@@ -6,6 +6,8 @@ build/
 !**/src/test/**
 spring-shell.log
 /*.csv
+/provisioning/*.retry
+/provisioning/roles/deploy-app/files/*.jar
 
 ### STS ###
 .apt_generated

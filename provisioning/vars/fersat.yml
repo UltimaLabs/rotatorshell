@@ -1,0 +1,11 @@
+---
+app_basedir: /opt/ultima/rotator-shell
+app_files_owner: ultima
+app_files_group: ultima
+
+num_old_jars_to_keep: 5
+
+app_executable_path: /usr/local/bin/rs
+app_properties_src: application-fersat1.yml.j2
+app_banner_src: banner.txt
+

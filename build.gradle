@@ -22,6 +22,17 @@ repositories {
 	mavenCentral()
 }
 
+task cleanDeployDir(type: Delete) {
+	delete fileTree('provisioning/roles/deploy-app/files') {
+		include '**/*.jar'
+	}
+}
+
+task buildDeployJar(type: Copy) {
+	from jar
+	into "provisioning/roles/deploy-app/files"
+}
+
 bootRun {
 	// otherwise bootRun crashes with
 	// "java.lang.IllegalStateException: Failed to execute ApplicationRunner" error
@@ -36,3 +47,6 @@ dependencies {
 	implementation 'org.apache.commons:commons-csv:1.8'
 	annotationProcessor 'org.projectlombok:lombok'
 }
+
+buildDeployJar.dependsOn cleanDeployDir, build
+
