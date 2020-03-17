@@ -8,8 +8,19 @@ import lombok.Data;
 @Data
 public class BatchOutputDataPoint {
 
+    /**
+     * Azimuth/elevation pair
+     */
     private final AzimuthElevation azimuthElevation;
+
+    /**
+     * Begin epoch, in milliseconds
+     */
     private final long epochBeginMillis;
+
+    /**
+     * End epoch, in milliseconds
+     */
     private final long epochEndMillis;
 
 }

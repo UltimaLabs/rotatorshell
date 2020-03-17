@@ -3,6 +3,7 @@ package com.ultimalabs.rotatorshell.shellbatch.util;
 import com.ultimalabs.rotatorshell.common.model.AzimuthElevation;
 import com.ultimalabs.rotatorshell.common.model.BatchInputDataPoint;
 import com.ultimalabs.rotatorshell.common.model.BatchOutputDataPoint;
+import com.ultimalabs.rotatorshell.common.model.BatchOutputParameters;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -21,9 +22,9 @@ import java.util.List;
 @Slf4j
 public class CsvUtil {
 
-    private static final String AZIMUTH = "azimuth";
-    private static final String ELEVATION = "elevation";
-    private static final String DURATION = "duration";
+    private static final String AZIMUTH = "azimuth" ;
+    private static final String ELEVATION = "elevation" ;
+    private static final String DURATION = "duration" ;
 
     private CsvUtil() {
         throw new IllegalStateException("Utility class");
@@ -68,7 +69,7 @@ public class CsvUtil {
      * Writes results of a rotator batch set to a CSV file
      *
      * @param outputDataPoints output data points - az/el, begin timestamp, end timestamp
-     * @param outputFileName output file name
+     * @param outputFileName   output file name
      * @return true on success
      */
     public static boolean writeOutputAzElData(List<BatchOutputDataPoint> outputDataPoints, String outputFileName) {
@@ -82,8 +83,7 @@ public class CsvUtil {
             return false;
         }
 
-        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.RFC4180.withHeader(AZIMUTH, ELEVATION, "begin_epoch_millis", "end_epoch_millis", "begin_timestamp", "end_timestamp")))
-        {
+        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.RFC4180.withHeader(AZIMUTH, ELEVATION, "begin_epoch_millis", "end_epoch_millis", "begin_timestamp", "end_timestamp"))) {
             for (BatchOutputDataPoint dataPoint : outputDataPoints) {
 
                 int azimuth = dataPoint.getAzimuthElevation().getAzimuth();
@@ -91,8 +91,8 @@ public class CsvUtil {
                 long beginEpochMillis = dataPoint.getEpochBeginMillis();
                 long endEpochMillis = dataPoint.getEpochEndMillis();
 
-                Date beginTime= new Date(beginEpochMillis);
-                Date endTime= new Date(endEpochMillis);
+                Date beginTime = new Date(beginEpochMillis);
+                Date endTime = new Date(endEpochMillis);
                 DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss.SSS");
                 String beginTimestamp = dateFormat.format(beginTime);
                 String endTimestamp = dateFormat.format(endTime);
@@ -107,6 +107,56 @@ public class CsvUtil {
             log.error("There was an error writing CSV data.");
             return false;
         }
+    }
+
+    public static boolean generateBatchData(BatchOutputParameters batchOutputParameters, String outputFileName) {
+
+        int azFrom = batchOutputParameters.getAzimuthFrom();
+        int azTo = batchOutputParameters.getAzimuthTo();
+        int elFrom = batchOutputParameters.getElevationFrom();
+        int elTo = batchOutputParameters.getElevationTo();
+        List<BatchInputDataPoint> dataPointList = new ArrayList<>();
+
+        if (batchOutputParameters.getMode().equals(BatchOutputParameters.MODE_AZ_FIRST)) {
+            for (int el = elFrom; el <= elTo; el++) {
+                for (int az = azFrom; az <= azTo; az++) {
+                    AzimuthElevation azEl = new AzimuthElevation(az, el);
+                    dataPointList.add(new BatchInputDataPoint(azEl, batchOutputParameters.getDuration()));
+                }
+            }
+        } else {
+            for (int az = azFrom; az <= azTo; az++) {
+                for (int el = elFrom; el <= elTo; el++) {
+                    AzimuthElevation azEl = new AzimuthElevation(az, el);
+                    dataPointList.add(new BatchInputDataPoint(azEl, batchOutputParameters.getDuration()));
+                }
+            }
+        }
+
+        FileWriter writer;
+
+        try {
+            writer = new FileWriter(outputFileName);
+        } catch (IOException e) {
+            log.error("There was an error writing output data to file: {}", outputFileName);
+            return false;
+        }
+
+        try (CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.RFC4180.withHeader(AZIMUTH, ELEVATION, DURATION))) {
+            for (BatchInputDataPoint dataPoint : dataPointList) {
+                int azimuth = dataPoint.getAzimuthElevation().getAzimuth();
+                int elevation = dataPoint.getAzimuthElevation().getElevation();
+                int duration = dataPoint.getDuration();
+
+                csvPrinter.printRecord(azimuth, elevation, duration);
+            }
+            csvPrinter.flush();
+            return true;
+        } catch (IOException e) {
+            log.error("There was an error writing CSV data.");
+            return false;
+        }
+
     }
 
 }
